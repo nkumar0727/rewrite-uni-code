@@ -4,11 +4,20 @@ TL;DR, write a `zip`-like utility that compresses ASCII files using a specified 
 
 ## Original 2018 Implementation
 
-TODO
+Used un
 
-## Improvements
+## 2023-01-27-refactored-zip
 
-TODO
+Improvements:
+- More detailed variable names for better readability
+- Better spacing and grouping of logical code segments
+- Replaced calls to `exit()` with `return`. [Difference between `exit()` and `return`](https://stackoverflow.com/questions/3463551/what-is-the-difference-between-exit-and-return):
+  - It's bad practice to call `exit()` because it immediately stops the current process.
+  - Only usecase is to end a child process started by `fork()`.
+  - In `main()` for this case, it does nearly the identical thing as `return`.
+  - C++ does much more work than C when exiting from functions (destructors of local objects going out of scope)
+  - However `exit()` does seem to flish `FILE*` streams.
+- Used [EXIT_SUCCESS and EXIT_FAILURE](https://en.cppreference.com/w/c/program/EXIT_status) instead of integer literals. This is more portable across platforms.
 
 ## Original 2018 Specification Text
 
