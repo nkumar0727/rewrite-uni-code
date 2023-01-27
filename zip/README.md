@@ -4,7 +4,11 @@ TL;DR, write a `zip`-like utility that compresses ASCII files using a specified 
 
 ## Original 2018 Implementation
 
-Used un
+- Get all file sizes by reading file statistics
+- Create a buffer in-memory with combined file sizes
+- Load all files into the buffer
+- Iterate through each char in the buffer and perform Run-length encoding
+- Immediately write encodings to STDOUT; many calls to `puts` and `fwrite()`. No idea why I decided to use two different functions...
 
 ## 2023-01-27-refactored-zip
 
