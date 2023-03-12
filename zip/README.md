@@ -3,7 +3,9 @@
 TL;DR, write a `zip`-like utility that compresses ASCII files using a specified [Run-length encoding](https://en.wikipedia.org/wiki/Run-length_encoding) scheme and output to STDOUT.
 
 ## Change Log
-- 2023-03-11: Added `e2e_test.py` for happy case unit test
+- 2023-03-11: 
+  - Added `e2e_test.py` for basic test cases
+  - Added `2023-03-11-tested-zip.c` for implementation which passes basic test cases
 - 2023-01-27: Refactored implementation for better legibility
 - 2018: Original Implementation
 
@@ -22,6 +24,11 @@ TL;DR, write a `zip`-like utility that compresses ASCII files using a specified 
 7. Unit tests using the [cmocka](https://cmocka.org/) testing framework.
 
 ## zip Program Iterations
+
+### 2023-03-11-tested-zip
+
+Improvements
+- Returning proper exit code when cumulative file bytes is 0
 
 ### 2023-01-27-refactored-zip
 
