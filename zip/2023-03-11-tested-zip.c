@@ -8,10 +8,12 @@
 
 #define LONGEST_POSSIBLE_CHARACTER_ENCODING_FREQUENCY (~0)
 #define NULL_TERMINATOR ('\0')
-#define MAX_FILE_COUNT (32767)
+#define MAX_FILE_COUNT (1000)
 
 #define NO_BYTES_EXIT_CODE (64)
 #define TOO_MANY_FILES_EXIT_CODE (65)
+#define MAX_TOTAL_FILE_BYTES_EXCEEDED (66)
+#define FILE_CANNOT_BE_OPENED_EXIT_CODE (67)
 
 int main(int argc, char **argv) {
 
@@ -55,7 +57,7 @@ int main(int argc, char **argv) {
         if (!fread_return_code) {
             printf("Could not read properly\n");
             free(memory_buffer_for_files);
-            return EXIT_FAILURE;
+            return FILE_CANNOT_BE_OPENED_EXIT_CODE;
         }
 
         next_byte_free_in_buffer += file_size_bytes_array[i - 1];

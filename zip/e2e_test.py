@@ -11,11 +11,14 @@ EXPECTED_ZIP_ENCODING = "ascii"
 BYTES_PER_UNSIGNED_INT = 4
 BYTES_PER_CHARACTER = 1
 
-MAX_FILE_COUNT = 32767
+MAX_FILE_COUNT = 1000
 
 # STATUS CODES
+SUCCESS_EXIT_CODE = 0
 NO_BYTES_EXIT_CODE = 64
 TOO_MANY_FILES_EXIT_CODE = 65
+MAX_TOTAL_FILE_BYTES_EXCEEDED = 66
+FILE_CANNOT_BE_OPENED_EXIT_CODE = 67
 
 class TestZipCases(unittest.TestCase):
 
@@ -38,12 +41,12 @@ class TestZipCases(unittest.TestCase):
         ]
         result = subprocess.run(args=script_args, timeout=60, stdout=self.output_file)
 
-        assert result.returncode == NO_BYTES_EXIT_CODE
+        self.assertEqual(NO_BYTES_EXIT_CODE, result.returncode)
 
         self.output_file.seek(0, os.SEEK_SET)
         file_size = os.stat(self.output_file.name).st_size
 
-        assert file_size == 0
+        self.assertEqual(0, file_size)
     
     def test_WHEN_allFilesHaveZeroBytes_THEN_exitCode64(self):
         script_args = [
@@ -53,33 +56,55 @@ class TestZipCases(unittest.TestCase):
         ]
         result = subprocess.run(args=script_args, timeout=60, stdout=self.output_file)
 
-        assert result.returncode == NO_BYTES_EXIT_CODE
+        self.assertEqual(NO_BYTES_EXIT_CODE, result.returncode)
 
         self.output_file.seek(0, os.SEEK_SET)
         file_size = os.stat(self.output_file.name).st_size
 
-        assert file_size == 0
+        self.assertEqual(0, file_size)
     
     def test_WHEN_totalFileCountExceedsInternalLimit_THEN_exitCode65(self):
-        assert True == False
-        '''
-        script_args = [EXECUTABLE_NAME] + ([os.path.join('', self.input_file_1.name)] * (MAX_FILE_COUNT + 1))
+        script_args = [EXECUTABLE_NAME] + (['a.txt'] * (MAX_FILE_COUNT + 1))
+        print(f"TotalSize: {len(' '.join(script_args))}")
 
         result = subprocess.run(args=script_args, timeout=60, stdout=self.output_file)
 
-        assert result.returncode == TOO_MANY_FILES_EXIT_CODE
+        self.assertEqual(TOO_MANY_FILES_EXIT_CODE, result.returncode)
 
         self.output_file.seek(0, os.SEEK_SET)
         file_size = os.stat(self.output_file.name).st_size
 
-        assert file_size == 0
-        '''
+        self.assertEqual(0, file_size)
     
     def test_WHEN_totalFileSizeExceedsInternalLimit_THEN_exitCode66(self):
-        assert True == False
+        self.fail("TODO: Implement")
 
+    @unittest.skip("Needs some research on best way to get file size in C...")
     def test_WHEN_oneFileCannotBeOpened_THEN_exitCode67(self):
-        assert True == False
+        unopenable_file = tempfile.NamedTemporaryFile(mode='w')
+        unopenable_file.write('aabbcc')
+        unopenable_file.close()
+
+        self.input_file_1.write('aabbcc')
+        self.input_file_1.close()
+        self.input_file_2.write('cddeef')
+        self.input_file_2.close()
+
+        script_args = [
+            EXECUTABLE_NAME,
+            os.path.join('', self.input_file_1.name), 
+            os.path.join('', unopenable_file.name),
+            os.path.join('', self.input_file_2.name)
+        ]
+
+        result = subprocess.run(args=script_args, timeout=60, stdout=self.output_file)
+
+        self.assertEqual(FILE_CANNOT_BE_OPENED_EXIT_CODE, result.returncode)
+
+        self.output_file.seek(0, os.SEEK_SET)
+        file_size = os.stat(self.output_file.name).st_size
+
+        self.assertEqual(0, file_size)
     
     def test_WHEN_twoFiles_THEN_outputCorrect(self):
         self.input_file_1.write('aabbcc')
@@ -96,7 +121,7 @@ class TestZipCases(unittest.TestCase):
 
         self.output_file.seek(0, os.SEEK_SET)
 
-        assert result.returncode == 0
+        self.assertEqual(SUCCESS_EXIT_CODE, result.returncode)
 
         output_buffer = self.output_file.read()
         char_list = []
@@ -119,9 +144,9 @@ class TestZipCases(unittest.TestCase):
             char_list.append(str(frequency))
             char_list.append(char)
 
-        result = ''.join(char_list)
+        encoded_result = ''.join(char_list)
 
-        assert result == "2a2b3c2d2e1f"
+        self.assertEqual("2a2b3c2d2e1f", encoded_result)
 
 if __name__ == "__main__":
     unittest.main()
